@@ -25,7 +25,7 @@ public class App
         //FileWorker fileObj = new FileWorker(30, 30);
         //fileObj.init();
         
-        GraphicalHandler obj = new GraphicalHandler();
+        GraphicalHandler obj = new GraphicalHandler(36, 550, 550);
         
     }
 }

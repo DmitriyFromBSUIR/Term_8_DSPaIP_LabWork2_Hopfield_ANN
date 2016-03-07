@@ -54,15 +54,18 @@ public class FileWorker {
 	
 	private String _pathToAllFiles = "D:\\Data\\Projects\\Eclipse_Workspace\\Java\\DSPaIP\\LabWork2_Hopfield_ANN\\Perceptron\\files\\";
 	
+	private int _patternsCount;
+	
 	//
 	public FileWorker() {
 		_mHeight = 0;
 		_mWidth = 0;
 	}
 	
-	public FileWorker(int matrixHeight, int matrixWidth) {
+	public FileWorker(int patternsCount, int matrixHeight, int matrixWidth) {
 		_mHeight = matrixHeight;
 		_mWidth = matrixWidth;
+		_patternsCount = patternsCount;
 		_matrix = new GenericMatrix(matrixHeight, matrixWidth);
 		int[] neuronData = new int[4];
         createMatrix(neuronData);
@@ -169,7 +172,7 @@ public class FileWorker {
         	break;
         }
         default:
-        	throw new RuntimeException("Error! Incorrect parameter in the function 'metrixOutpput'");
+        	throw new RuntimeException("Error! Incorrect parameter in the function 'metrixOutput'");
         }
         
         int[] neuronData = new int[4];
@@ -201,7 +204,7 @@ public class FileWorker {
     	}
     	else {
     		filewriter.close();
-    		throw new RuntimeException("Error! Incorrect parameter in the function 'metrixOutpput'");
+    		throw new RuntimeException("Error! Incorrect parameter in the function 'writeFile'");
     	}
     }
     
@@ -227,9 +230,55 @@ public class FileWorker {
     	}
     	else {
     		scannerfile.close();
-    		throw new RuntimeException("Error! Incorrect parameter in the function 'metrixOutpput'");
+    		throw new RuntimeException("Error! Incorrect parameter in the function 'readFile'");
     	}
         
+    }
+    
+    public static void writeFile(String filename, int[][] matrix, int imgWidth, int imgHeight) throws FileNotFoundException, IOException, RuntimeException {
+    	FileWriter filewriter = new FileWriter(new File(filename));
+    	
+    	if( (imgWidth > 0) && (imgHeight > 0) ) {
+	 
+	        for (int i=0; i < imgHeight; i++) {
+	            for (int j=0; j < imgWidth; j++) {
+	                filewriter.write(matrix[i][j] + " ");
+	            }
+	            filewriter.write("\n");
+	        }
+	        filewriter.flush();
+	        filewriter.close();
+    	}
+    	else {
+    		filewriter.close();
+    		throw new RuntimeException("Error! Incorrect parameter in the function 'writeFile'");
+    	}
+    }
+    
+    public static int[][] readFile(String filename, int imgWidth, int imgHeight) throws FileNotFoundException, IOException, RuntimeException {
+    	File file = new File(filename);
+    	Scanner scannerfile = new Scanner(file);
+    	
+    	int[][] matrixData = new int[imgWidth][imgHeight];
+    	
+    	if( (imgWidth > 0) && (imgHeight > 0) ) {
+	        
+	        for (int i=0; i < imgHeight; i++) {
+	            for (int j=0; j < imgWidth; j++) {
+	                if(scannerfile.hasNextInt()) {
+	                	matrixData[i][j] = scannerfile.nextInt();
+	                }
+	            }
+	 
+	        }
+	        scannerfile.close();
+    	}
+    	else {
+    		scannerfile.close();
+    		throw new RuntimeException("Error! Incorrect parameter in the function 'readFile'");
+    	}
+        
+    	return matrixData;
     }
     
     public String convertFileNumberToFilename(int fileN) {
