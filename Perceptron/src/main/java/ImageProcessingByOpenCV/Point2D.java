@@ -49,7 +49,7 @@ public class Point2D {
 		_pointStruct[2] = _pointValue;
 	}
 	
-	boolean isEqual(int x, int y, int pointValue) {
+	public boolean isEqual(int x, int y, int pointValue) {
 		if( (_x == x) && (_y == y) && (_pointValue == pointValue) ) {
 			return true;
 		}

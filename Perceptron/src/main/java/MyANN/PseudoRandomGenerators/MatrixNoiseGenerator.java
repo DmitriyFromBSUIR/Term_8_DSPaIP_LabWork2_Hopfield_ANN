@@ -25,6 +25,8 @@ public class MatrixNoiseGenerator {
 	private int _imgHeight;
 	private String _pathToAllFiles = "D:\\Data\\Projects\\Eclipse_Workspace\\Java\\DSPaIP\\LabWork2_Hopfield_ANN\\Perceptron\\files\\";
 	private Vector<Point2D> _pointsListWithNoise;
+	// lists that have "noise" points for all files 
+	private Point2D [][] _noisePointsLists;
 	
 	public String convertFileNumberToFilename(int fileN, String endFilePath) {
     	String filename;
@@ -58,9 +60,61 @@ public class MatrixNoiseGenerator {
 		return false;
 	}
 	
-	public Vector<Point2D> generatePseudoRandomPoints() {
+	public Point2D generatePseudoRandomPoints(int minVal1, int maxVal1, int minVal2, int maxVal2) {
+		//return Math.random() * (maxVal - minVal) + minVal; 
+		
+		// generate x index
+		int indX = (int) (Math.floor(Math.random() * (maxVal1 - minVal1 + 1)) + minVal1); 
+		// generate y index
+		int indY = (int) (Math.floor(Math.random() * (maxVal2 - minVal2 + 1)) + minVal2);
+		// search point value by matrix 
+		int pointVal = 0;
+		/*
+		for(int i=0; i<_imgHeight; i++) {
+			for(int j=0; j<_imgWidth; j++) {
+				if( (i == indX) && (j == indY) )
+					pointVal = _matrix[i][j];
+			}
+		}
+		*/
+		pointVal = _matrix[indX][indY];
+		// create Point2D
+		Point2D point = new Point2D(indX, indY, pointVal);
+		
+		return point;
+	}
+	
+	public Vector<Point2D> generatePseudoRandomPointsList() {
+		//generate the point
+		Point2D point = generatePseudoRandomPoints(0, _imgHeight, 0, _imgWidth);
+		//create vector
+		Vector<Point2D> pointsList = new Vector<Point2D>();
+		//check up for unique values in the vector
+		int vectSize = pointsList.size();
+		if(vectSize == 0) {
+			pointsList.addElement(point);
+		}
+		else {
+			for(int i=0; i<vectSize; i++) {
+				while( pointsList.elementAt(i).isEqual(point.getX(), point.getY(), point.getPointValue()) ) {
+					//regenerate the point
+					point = generatePseudoRandomPoints(0, _imgHeight, 0, _imgWidth);
+					// check up the vector from the start
+					i = 0;
+				}
+			}
+			// add point
+			pointsList.addElement(point);
+		}
+		return pointsList;
+	}
+	
+	public Point2D [][] generatePseudoRandomPointsMatrix() {
+		//Vector<Point2D> pointsList = new Vector<Point2D>();
+		Point2D [][] _noisePointsLists = new Point2D [_patternsCount][_pointsCount];
 		
 		
+		return _noisePointsLists;
 	}
 	
 	public void addNoiseToImages() throws FileNotFoundException, IOException, RuntimeException {
