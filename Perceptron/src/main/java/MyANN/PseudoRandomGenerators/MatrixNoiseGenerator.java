@@ -13,7 +13,13 @@ import java.util.Vector;
  */
 
 import MyANN.FilesProcessing.*;
+
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.highgui.Highgui;
+
 import ImageProcessingByOpenCV.*;
 
 public class MatrixNoiseGenerator {
@@ -112,20 +118,73 @@ public class MatrixNoiseGenerator {
 	public Point2D [][] generatePseudoRandomPointsMatrix() {
 		//Vector<Point2D> pointsList = new Vector<Point2D>();
 		Point2D [][] _noisePointsLists = new Point2D [_patternsCount][_pointsCount];
-		
-		
+		Vector<Point2D> pointsList;
+		for(int i=0; i<_patternsCount; i++) {
+			pointsList = generatePseudoRandomPointsList();
+			for(int j=0; j<_pointsCount; j++) {
+				_noisePointsLists[i][j] = pointsList.elementAt(i);
+			}
+		}
 		return _noisePointsLists;
 	}
 	
-	public void addNoiseToImages() throws FileNotFoundException, IOException, RuntimeException {
-		
+	public int inversePointValue(int pointValue) {
+		return ~pointValue;
+	}
+	
+	public void addNoiseToImages(int patternNumber) throws FileNotFoundException, IOException, RuntimeException {
+		for(int k=0; k<_pointsCount; k++) {
+			for(int i=0; i<_imgHeight; i++) {
+				for(int j=0; j<_imgWidth; j++) {
+					if( (i == _noisePointsLists[patternNumber][k].getX()) && (i == _noisePointsLists[patternNumber][k].getY()) ) {
+						_matrix[i][j] = inversePointValue(_noisePointsLists[patternNumber][k].getPointValue());
+					}
+				}
+			}
+		}
+	}
+	
+	void sequencePatternImageFilesProcessing(int patternNumber) throws FileNotFoundException, IOException, RuntimeException {
+		//File root = Environment.getExternalStorageDirectory();
+		//matrix = Highgui.imread(file.getCanonicalPath());
+		System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
+		Mat matrix = new Mat(550, 550, CvType.CV_8UC1);
+		//Mat binarizatingMatrix = new Mat(550, 550, CvType.CV_8UC1);
+		//for(int k=0; k<_patternsCount; k++) {
+			matrix = Highgui.imread(convertFileNumberToFilename(patternNumber, ".jpg"));
+			int imgWidth = matrix.width();
+			int imgHeight = matrix.height();
+			for(int i=0; i<imgWidth; i++) {
+				for(int j=0; j<imgHeight; j++) {
+					double[] pixel = matrix.get(i, j);
+					
+					if(pixel[0] == 255) { // if pixel is white
+						
+					}
+					if(pixel[0] == 0) { // if pixel is black
+						
+					}
+				}
+			}
+			FileWorker.writeFile(convertFileNumberToFilename(patternNumber, "_noise.jpg"), matrix, imgWidth, imgHeight);
+			//Highgui.imwrite(convertFileNumberToFilename(k, "_binarizated.jpg"), matrix);
+		//}
+		//Mat mat = Mat.eye( 3, 3, CvType.CV_8UC1 );
+	    //System.out.println( "mat = " + matrix.dump() );
 	}
 	
 	public void run() throws FileNotFoundException, IOException, RuntimeException {
 		for(int k=0; k<_patternsCount; k++) {
 			String filename = convertFileNumberToFilename(k, ".txt");
 			_matrix = FileWorker.readFile(filename, _imgWidth, _imgHeight);
-			
+			addNoiseToImages(k);
+			//create images with noise
+			sequencePatternImageFilesProcessing(k);
+			//save to txt file
+			String filenameNew = convertFileNumberToFilename(k, "_noise.txt");
+			//
+			FileWorker.writeFile(filenameNew, _matrix, _imgWidth, _imgHeight);
+
 		}
 	}
 	
