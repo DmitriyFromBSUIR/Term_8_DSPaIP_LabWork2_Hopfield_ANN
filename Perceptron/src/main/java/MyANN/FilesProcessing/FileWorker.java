@@ -267,6 +267,7 @@ public class FileWorker {
 	            for (int j=0; j < imgWidth; j++) {
 	                if(scannerfile.hasNextInt()) {
 	                	matrixData[i][j] = scannerfile.nextInt();
+	                	System.out.println(matrixData[i][j]);
 	                }
 	            }
 	 

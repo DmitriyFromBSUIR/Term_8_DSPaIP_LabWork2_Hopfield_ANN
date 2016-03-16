@@ -18,6 +18,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 
 import ImageProcessingByOpenCV.*;
@@ -27,6 +28,8 @@ public class MatrixNoiseGenerator {
 	
 	private int _patternsCount;
 	private int _pointsCount;
+	//private long _pointsCount;
+	private int _percentsOfNoise;
 	private int _imgWidth;
 	private int _imgHeight;
 	private String _pathToAllFiles = "D:\\Data\\Projects\\Eclipse_Workspace\\Java\\DSPaIP\\LabWork2_Hopfield_ANN\\Perceptron\\files\\";
@@ -156,6 +159,7 @@ public class MatrixNoiseGenerator {
 			int imgHeight = matrix.height();
 			for(int i=0; i<imgWidth; i++) {
 				for(int j=0; j<imgHeight; j++) {
+					/*
 					double[] pixel = matrix.get(i, j);
 					
 					if(pixel[0] == 255) { // if pixel is white
@@ -164,37 +168,55 @@ public class MatrixNoiseGenerator {
 					if(pixel[0] == 0) { // if pixel is black
 						
 					}
+					*/
+					if(_matrix[i][j] == 1)
+						matrix.setTo(new Scalar(0.0));
+					else
+						matrix.setTo(new Scalar(255.0));
 				}
 			}
-			FileWorker.writeFile(convertFileNumberToFilename(patternNumber, "_noise.jpg"), matrix, imgWidth, imgHeight);
+			//save to image file
+			Highgui.imwrite(convertFileNumberToFilename(patternNumber, "_" + new Integer(_percentsOfNoise).toString() + "_percents_of_noise.jpg"), matrix);
+			//FileWorker.writeFile(convertFileNumberToFilename(patternNumber, "_noise.jpg"), matrix, imgWidth, imgHeight);
 			//Highgui.imwrite(convertFileNumberToFilename(k, "_binarizated.jpg"), matrix);
 		//}
-		//Mat mat = Mat.eye( 3, 3, CvType.CV_8UC1 );
-	    //System.out.println( "mat = " + matrix.dump() );
 	}
 	
 	public void run() throws FileNotFoundException, IOException, RuntimeException {
 		for(int k=0; k<_patternsCount; k++) {
 			String filename = convertFileNumberToFilename(k, ".txt");
 			_matrix = FileWorker.readFile(filename, _imgWidth, _imgHeight);
+			// create the matrix
+			generatePseudoRandomPointsMatrix();
+			// create noise in the images
 			addNoiseToImages(k);
 			//create images with noise
 			sequencePatternImageFilesProcessing(k);
 			//save to txt file
-			String filenameNew = convertFileNumberToFilename(k, "_noise.txt");
+			//String filenameNew = convertFileNumberToFilename(k, "_noise.txt");
+			String filenameNew = convertFileNumberToFilename(k, "_" + new Integer(_percentsOfNoise).toString() + "_percents_of_noise");
 			//
 			FileWorker.writeFile(filenameNew, _matrix, _imgWidth, _imgHeight);
 
 		}
 	}
 	
+	public int pointsCountCalc() {
+		//int result = (int)( ((double)_percentsOfNoise/100) * (_imgWidth * _imgHeight));
+		
+		//return (int)( ((double)_percentsOfNoise/100) * (_imgWidth * _imgHeight));
+		return (int) Math.round(  ((double)_percentsOfNoise/100) * (_imgWidth * _imgHeight) );
+		//return Math.round( (_percentsOfNoise/100) * (_imgWidth * _imgHeight) );
+	}
+	
 	public MatrixNoiseGenerator(int patternsCount, int imgWidth, int imgHeight, int percents) throws FileNotFoundException, IOException, RuntimeException {
 		//_matrix = new int[imgWidth][imgHeight];
 		_patternsCount = patternsCount;
-		_pointsCount = percents;
+		_percentsOfNoise = percents;
 		_imgWidth = imgWidth;
 		_imgHeight = imgHeight;
-		
+		// calc the count of points that we must add noise
+		_pointsCount = pointsCountCalc();
 		run();
 	}
 }
