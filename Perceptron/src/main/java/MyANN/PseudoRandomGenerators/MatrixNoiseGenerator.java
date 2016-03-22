@@ -94,52 +94,61 @@ public class MatrixNoiseGenerator {
 	}
 	
 	public Vector<Point2D> generatePseudoRandomPointsList() {
-		//generate the point
-		Point2D point = generatePseudoRandomPoints(0, _imgHeight, 0, _imgWidth);
 		//create vector
 		Vector<Point2D> pointsList = new Vector<Point2D>();
-		//check up for unique values in the vector
-		int vectSize = pointsList.size();
-		if(vectSize == 0) {
-			pointsList.addElement(point);
-		}
-		else {
-			for(int i=0; i<vectSize; i++) {
-				while( pointsList.elementAt(i).isEqual(point.getX(), point.getY(), point.getPointValue()) ) {
-					//regenerate the point
-					point = generatePseudoRandomPoints(0, _imgHeight, 0, _imgWidth);
-					// check up the vector from the start
-					i = 0;
-				}
+		
+		
+		for(int k=0; k<_pointsCount; k++) {
+			//generate the point
+			Point2D point = generatePseudoRandomPoints(0, _imgHeight-1, 0, _imgWidth-1);
+			
+			//check up for unique values in the vector
+			int vectSize = pointsList.size();
+			
+			if(vectSize == 0) {
+				pointsList.addElement(point);
 			}
-			// add point
-			pointsList.addElement(point);
+			else {
+				for(int i=0; i<vectSize; i++) {
+					while( pointsList.elementAt(i).isEqual(point.getX(), point.getY(), point.getPointValue()) ) {
+						//regenerate the point
+						point = generatePseudoRandomPoints(0, _imgHeight-1, 0, _imgWidth-1);
+						// check up the vector from the start
+						i = 0;
+					}
+				}
+				// add point
+				pointsList.addElement(point);
+			}
 		}
+		
 		return pointsList;
 	}
 	
-	public Point2D [][] generatePseudoRandomPointsMatrix() {
+	public Point2D [][] generatePseudoRandomPointsMatrix(int patternNumber) {
 		//Vector<Point2D> pointsList = new Vector<Point2D>();
-		Point2D [][] _noisePointsLists = new Point2D [_patternsCount][_pointsCount];
+		
 		Vector<Point2D> pointsList;
-		for(int i=0; i<_patternsCount; i++) {
+		//for(int i=0; i<_patternsCount; i++) {
 			pointsList = generatePseudoRandomPointsList();
 			for(int j=0; j<_pointsCount; j++) {
-				_noisePointsLists[i][j] = pointsList.elementAt(i);
+				_noisePointsLists[patternNumber][j] = pointsList.elementAt(j);
 			}
-		}
+		//}
 		return _noisePointsLists;
 	}
 	
 	public int inversePointValue(int pointValue) {
-		return ~pointValue;
+		// find inverse val and find the absolute value 
+		int invPointVal = Math.abs(~pointValue);
+		return invPointVal;
 	}
 	
 	public void addNoiseToImages(int patternNumber) throws FileNotFoundException, IOException, RuntimeException {
 		for(int k=0; k<_pointsCount; k++) {
 			for(int i=0; i<_imgHeight; i++) {
 				for(int j=0; j<_imgWidth; j++) {
-					if( (i == _noisePointsLists[patternNumber][k].getX()) && (i == _noisePointsLists[patternNumber][k].getY()) ) {
+					if( (i == _noisePointsLists[patternNumber][k].getX()) && (j == _noisePointsLists[patternNumber][k].getY()) ) {
 						_matrix[i][j] = inversePointValue(_noisePointsLists[patternNumber][k].getPointValue());
 					}
 				}
@@ -147,11 +156,17 @@ public class MatrixNoiseGenerator {
 		}
 	}
 	
-	void sequencePatternImageFilesProcessing(int patternNumber) throws FileNotFoundException, IOException, RuntimeException {
+	public void sequencePatternImageFilesProcessing(int patternNumber) throws FileNotFoundException, IOException, RuntimeException {
 		//File root = Environment.getExternalStorageDirectory();
 		//matrix = Highgui.imread(file.getCanonicalPath());
+		
+		//create black pixel
+		double[] blackPixel = {0.0, 0.0, 0.0};
+		//create white pixel
+		double[] whitePixel = {255.0, 255.0, 255.0};
+		
 		System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
-		Mat matrix = new Mat(550, 550, CvType.CV_8UC1);
+		Mat matrix = new Mat(550, 550, CvType.CV_8UC3);
 		//Mat binarizatingMatrix = new Mat(550, 550, CvType.CV_8UC1);
 		//for(int k=0; k<_patternsCount; k++) {
 			matrix = Highgui.imread(convertFileNumberToFilename(patternNumber, ".jpg"));
@@ -169,16 +184,18 @@ public class MatrixNoiseGenerator {
 						
 					}
 					*/
-					if(_matrix[i][j] == 1)
-						matrix.setTo(new Scalar(0.0));
-					else
-						matrix.setTo(new Scalar(255.0));
+					if(_matrix[i][j] == 1) // if pixel is black
+						matrix.put(i, j, blackPixel);
+					else // if pixel is white
+						matrix.put(i, j, whitePixel);
 				}
 			}
+			//generate the new filepath to img
+			String newFilenameForImg = convertFileNumberToFilename(patternNumber, "_with_" + new Integer(_percentsOfNoise).toString() + "_percents_of_noise.jpg");
 			//save to image file
-			Highgui.imwrite(convertFileNumberToFilename(patternNumber, "_" + new Integer(_percentsOfNoise).toString() + "_percents_of_noise.jpg"), matrix);
+			boolean writeResult = Highgui.imwrite(newFilenameForImg, matrix);
 			//FileWorker.writeFile(convertFileNumberToFilename(patternNumber, "_noise.jpg"), matrix, imgWidth, imgHeight);
-			//Highgui.imwrite(convertFileNumberToFilename(k, "_binarizated.jpg"), matrix);
+			
 		//}
 	}
 	
@@ -187,14 +204,14 @@ public class MatrixNoiseGenerator {
 			String filename = convertFileNumberToFilename(k, ".txt");
 			_matrix = FileWorker.readFile(filename, _imgWidth, _imgHeight);
 			// create the matrix
-			generatePseudoRandomPointsMatrix();
+			generatePseudoRandomPointsMatrix(k);
 			// create noise in the images
 			addNoiseToImages(k);
 			//create images with noise
 			sequencePatternImageFilesProcessing(k);
 			//save to txt file
 			//String filenameNew = convertFileNumberToFilename(k, "_noise.txt");
-			String filenameNew = convertFileNumberToFilename(k, "_" + new Integer(_percentsOfNoise).toString() + "_percents_of_noise");
+			String filenameNew = convertFileNumberToFilename(k, "_with_" + new Integer(_percentsOfNoise).toString() + "_percents_of_noise.txt");
 			//
 			FileWorker.writeFile(filenameNew, _matrix, _imgWidth, _imgHeight);
 
@@ -217,6 +234,8 @@ public class MatrixNoiseGenerator {
 		_imgHeight = imgHeight;
 		// calc the count of points that we must add noise
 		_pointsCount = pointsCountCalc();
+		// create matrix that have format [patternNumber] --- [noise_points_list]
+		_noisePointsLists = new Point2D [_patternsCount][_pointsCount];
 		run();
 	}
 }

@@ -34,7 +34,7 @@ public class App
         //fileObj.init();
         
         // create GraphicalHandler that processing the source image patterns and "binarized" to each of them
-        GraphicalHandler obj = new GraphicalHandler(patternsCount, imgWidth, imgHeight);
+        //GraphicalHandler obj = new GraphicalHandler(patternsCount, imgWidth, imgHeight);
         
         int percentsOfnoise = 10;
         for(int i=0; i<10; i++) {
