@@ -199,16 +199,48 @@ public class MatrixNoiseGenerator {
 		//}
 	}
 	
+	public void whiteBlackImageColorsInverse(int patternNumber) {
+		//create black pixel
+		double[] blackPixel = {0.0, 0.0, 0.0};
+		//create white pixel
+		double[] whitePixel = {255.0, 255.0, 255.0};
+				
+		System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
+		Mat matrix = new Mat(550, 550, CvType.CV_8UC3);
+		//Mat binarizatingMatrix = new Mat(550, 550, CvType.CV_8UC1);
+		//for(int k=0; k<_patternsCount; k++) {
+		matrix = Highgui.imread(convertFileNumberToFilename(patternNumber, ".jpg"));
+		int imgWidth = matrix.width();
+		int imgHeight = matrix.height();
+		for(int i=0; i<imgWidth; i++) {
+			for(int j=0; j<imgHeight; j++) {
+				if(_matrix[i][j] == 1) // if pixel is black
+					matrix.put(i, j, whitePixel);
+				else // if pixel is white
+					matrix.put(i, j, blackPixel);
+			}
+		}
+		//generate the new filepath to img
+		String newFilenameForImg = convertFileNumberToFilename(patternNumber, "_with_" + new Integer(_percentsOfNoise).toString() + "_percents_of_noise.jpg");
+		//save to image file
+		boolean writeResult = Highgui.imwrite(newFilenameForImg, matrix);
+	}
+	
 	public void run() throws FileNotFoundException, IOException, RuntimeException {
 		for(int k=0; k<_patternsCount; k++) {
 			String filename = convertFileNumberToFilename(k, ".txt");
 			_matrix = FileWorker.readFile(filename, _imgWidth, _imgHeight);
-			// create the matrix
-			generatePseudoRandomPointsMatrix(k);
-			// create noise in the images
-			addNoiseToImages(k);
-			//create images with noise
-			sequencePatternImageFilesProcessing(k);
+			if(_percentsOfNoise == 100) {
+				whiteBlackImageColorsInverse(k);
+			}
+			else {
+				// create the matrix
+				generatePseudoRandomPointsMatrix(k);
+				// create noise in the images
+				addNoiseToImages(k);
+				//create images with noise
+				sequencePatternImageFilesProcessing(k);
+			}
 			//save to txt file
 			//String filenameNew = convertFileNumberToFilename(k, "_noise.txt");
 			String filenameNew = convertFileNumberToFilename(k, "_with_" + new Integer(_percentsOfNoise).toString() + "_percents_of_noise.txt");

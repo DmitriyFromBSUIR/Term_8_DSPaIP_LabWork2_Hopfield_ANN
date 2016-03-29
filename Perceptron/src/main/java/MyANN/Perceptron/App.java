@@ -37,10 +37,12 @@ public class App
         //GraphicalHandler obj = new GraphicalHandler(patternsCount, imgWidth, imgHeight);
         
         int percentsOfnoise = 10;
-        for(int i=0; i<10; i++) {
+        for(int i=10; i<=10; i++) {
+        	//
+        	percentsOfnoise = i*10;
 	        // create MatrixNoiseGenerator that processing the source image patterns and add "noise" to each of them
 	        MatrixNoiseGenerator noiseGen = new MatrixNoiseGenerator(patternsCount, imgWidth, imgHeight, percentsOfnoise);
-	        percentsOfnoise += 10;
+	        //percentsOfnoise += 10;
         }
     }
 }
