@@ -32,9 +32,11 @@ import MyANN.PseudoRandomGenerators.MatrixNoiseGenerator;
 public class SynapseMatrix {
 	
 	private GenericMatrix _weights;
+	private int[][] _intWeights;
 	private int _patternsCount;
 	private int _imgWidth;
 	private int _imgHeight;
+	private int _generalImageSize;
 	
 	private String _pathToAllFiles = "D:\\Data\\Projects\\Eclipse_Workspace\\Java\\DSPaIP\\LabWork2_Hopfield_ANN\\Perceptron\\files\\";
 	
@@ -74,7 +76,11 @@ public class SynapseMatrix {
 		return vector;
 	}
 	
-	
+	/*
+	public int[][] transformVectorToMatrix() {
+		
+	}
+	*/
 	
 	// learn the ANN
 	public void synapsesLearning() throws FileNotFoundException, IOException, RuntimeException {
@@ -109,18 +115,28 @@ public class SynapseMatrix {
 			// find weight coef but calc ranged matrix
 			for(int i = 0; i < generalImgSize; i++) {
 				for(int j = 0; j <= i; j++) {
+					
 					if(i == j) {
-						_weights.add(i, j, 0);
+						//_weights.add(i, j, 0);
+						_intWeights[i][j] = 0;
 					}
 					else {
-						_weights.add(i, j, imgVector[i]*imgVector[j]);
-						_weights.add(j, i, imgVector[i]*imgVector[j]);
+						//_weights.add(i, j, imgVector[i]*imgVector[j]);
+						//_weights.add(j, i, imgVector[i]*imgVector[j]);
+						_intWeights[i][j] += imgVector[i]*imgVector[j];
+						// beacause the matrix is raged
+						_intWeights[j][i] += imgVector[i]*imgVector[j];
 					}
+					
 				}
 			}
+			
 		}
-		
-		
+		//_weights.convertToIntMatrix(0);
+		//transformVectorToMatrix();
+		//FileWorker.writeFile(_pathToAllFiles + "weights.txt", _weights.getIntMatrix(), _imgWidth, _imgHeight);
+		FileWorker.writeFile(_pathToAllFiles + "weights.txt", _intWeights, _imgWidth, _imgHeight);
+		System.out.println("Matrix Weights was written in 'weights.txt' file");
 	}
 	
 	
@@ -130,8 +146,10 @@ public class SynapseMatrix {
 		_patternsCount = patternsCount;
 		_imgWidth = imgWidth;
 		_imgHeight = imgHeight;
+		//_generalImageSize = _imgWidth * _imgHeight;
 		
 		synapsesLearning();
+		System.out.println("ANN Learning have been finished");
 		
 		runSynapsesTraining();
 	}
@@ -147,31 +165,37 @@ public class SynapseMatrix {
         // the count of patterns that ANN have to recognition
         int patternsCount = 36;
         // the width of the image
-        int imgWidth = 550;
+        //int imgWidth = 550;
+        int imgWidth = 64;
         // the height of the image
-        int imgHeight = 550;
+        //int imgHeight = 550;
+        int imgHeight = 64;
         
         // ========================================= run this section of code a one time =========================================
         
         // create FileWorker that processing the source image files and create the Neuron's GenericMatrix 
         //FileWorker fileObj = new FileWorker(patternsCount, imgWidth, imgHeight);
         //fileObj.init();
-        
+        /*
         // create GraphicalHandler that processing the source image patterns and "binarized" to each of them
-        //GraphicalHandler obj = new GraphicalHandler(patternsCount, imgWidth, imgHeight);
+        GraphicalHandler obj = new GraphicalHandler(patternsCount, imgWidth, imgHeight);
         
         // add noise with different percents to all files 
         int percentsOfnoise = 10;
-        for(int i=0; i<10; i++) {
+        for(int i=9; i<10; i++) {
+        	//
+        	percentsOfnoise = (i+1)*10;
 	        // create MatrixNoiseGenerator that processing the source image patterns and add "noise" to each of them
 	        MatrixNoiseGenerator noiseGen = new MatrixNoiseGenerator(patternsCount, imgWidth, imgHeight, percentsOfnoise);
-	        percentsOfnoise += 10;
+	        //percentsOfnoise += 10;
         }
-        
+        */
         // =======================================================================================================================
         
         // create matrix that have weight coefficients 
-        int generalImageSize = imgWidth*imgHeight;
-        _weights = new GenericMatrix(generalImageSize, generalImageSize);
+        //int generalImageSize = imgWidth*imgHeight;
+        _generalImageSize = imgWidth * imgHeight;
+        //_weights = new GenericMatrix(generalImageSize, generalImageSize);
+        _intWeights = new int [_generalImageSize][_generalImageSize];
 	}
 }

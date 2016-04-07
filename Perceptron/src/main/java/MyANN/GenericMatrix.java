@@ -30,6 +30,8 @@ public class GenericMatrix implements Cloneable, Serializable {
 	 * 
 	 */
 	private Vector<Vector<Neuron>> _neurons;
+	//
+	private int[][] _neuronsIntVals;
 	private long _rowsCount;
 	private long _colsCount;
 	//private long _intMatrix[][];
@@ -252,6 +254,40 @@ public class GenericMatrix implements Cloneable, Serializable {
 	
 	public Neuron getNeuron(int row, int col) {
 		return _neurons.elementAt(row).elementAt(col);
+	}
+	
+	public void convertToIntMatrix(int neuronsParameterNumber) {
+		_neuronsIntVals = new int [(int)_rowsCount][(int)_colsCount];
+		for(int i=0; i < (int)_rowsCount; i++) {
+			for(int j=0; j < (int)_colsCount; j++) {
+				switch(neuronsParameterNumber) {
+					case 0: {
+						_neuronsIntVals[i][j] = getNeuron(i, j).getWeight();
+						break;
+					}
+					case 1: {
+						_neuronsIntVals[i][j] = getNeuron(i, j).getDendrite();
+						break;
+					}
+					case 2: {
+						_neuronsIntVals[i][j] = getNeuron(i, j).getAxon();
+						break;
+					}
+					case 3: {
+						_neuronsIntVals[i][j] = getNeuron(i, j).getConnectingLinkStrength();
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	public int[][] getIntMatrix() {
+		return _neuronsIntVals;
+	}
+	
+	public void setIntMatrix(int[][] newIntMatrix) {
+		_neuronsIntVals = newIntMatrix;
 	}
 
 	public void add(final int row, final int col, final int value) {
